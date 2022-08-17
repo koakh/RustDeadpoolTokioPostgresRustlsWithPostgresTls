@@ -1,0 +1,54 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'tokio-postgres-rustls-connection-pool-demo'",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=tokio-postgres-rustls-connection-pool-demo",
+          "--package=tokio-postgres-rustls-connection-pool-demo"
+        ],
+        "filter": {
+          "name": "tokio-postgres-rustls-connection-pool-demo",
+          "kind": "bin"
+        }
+      },
+      "args": [], 
+      "env": {
+        "RUST_LOG": "debug",
+        "PG.DBNAME": "postgres",
+        "PG.HOST": "localhost",
+        "PG.PORT": "6432",
+        "PG.USER": "postgres",
+        "PG.PASSWORD": "postgres",
+        "DB_CA_CERT": "./ssl-cert-snakeoil.pem"
+      },
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'tokio-postgres-rustls-connection-pool-demo'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=tokio-postgres-rustls-connection-pool-demo",
+          "--package=tokio-postgres-rustls-connection-pool-demo"
+        ],
+        "filter": {
+          "name": "tokio-postgres-rustls-connection-pool-demo",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

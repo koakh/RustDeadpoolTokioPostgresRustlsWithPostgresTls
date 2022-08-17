@@ -57,6 +57,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         tls_config.root_store.add_pem_file(&mut buf).map_err(|_| {
             anyhow::anyhow!("failed to read database root certificate: {}", ca_cert)
         })?;
+        // https://sharebold.com/posts/a-curious-tale-of-rust-tls-and-postgres-in-the-cloud-434k
+        // https://crates.io/crates/webpki-roots
 
         let tls = MakeRustlsConnect::new(tls_config);
         settings.pg.create_pool(tls)?
