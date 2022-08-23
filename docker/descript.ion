@@ -1,0 +1,3 @@
+data			postgre data dir
+docker-compose.yml	some trings to use outside certificates, but have some problems with permissions, used snakeoil ecert inside container
+postgres-initdb		some trings to use outside certificates, but have some problems with permissions, used snakeoil ecert inside container
