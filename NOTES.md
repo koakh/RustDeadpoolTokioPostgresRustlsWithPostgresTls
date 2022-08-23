@@ -1,13 +1,20 @@
 # NOTES
 
+## Links
+
+- [Radical Candor In Practice — Sharebold](https://sharebold.com/posts/a-curious-tale-of-rust-tls-and-postgres-in-the-cloud-434k)
+- [Getting Title at 50:23](https://github.com/ecliptical/tokio-postgres-rustls-rds-demo)
+- [How to Setup PostgreSQL with SSL inside a Docker Container](https://dev.to/danvixent/how-to-setup-postgresql-with-ssl-inside-a-docker-container-5f3)
+- [Enabling SSL for PostgreSQL in Docker](https://gist.github.com/mrw34/c97bb03ea1054afb551886ffc8b63c3b)
+
 ```shell
 $ env PG.DBNAME=postgres PG.HOST=localhost PG.PORT=6432 PG.USER=postgres PG.PASSWORD=postgres DB_CA_CERT=docker/postgres-certs/ca.pem RUST_LOG=debug cargo run
 ```
 
-used certificates that comes with image, else we always have permissions propblems if use outside certificates, even with same permissions
+used certificates that comes with image, else we always have permissions problems if use outside certificates, even with same permissions
 
 ```shell
-docker run \
+$ docker run \
   -it \
   --rm \
   -e POSTGRES_PASSWORD=password \
@@ -16,19 +23,26 @@ docker run \
   -c ssl=on \
   -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem \
   -c ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+# outcome
+2022-08-23 21:21:51.975 UTC [1] LOG:  database system is ready to accept connections  
 
-# using ssl-cert-snakeoil.pem from inside container
+# using ssl-cert-snakeoil.pem from inside container with localhost will fail
 $ env PG.DBNAME=postgres PG.HOST=localhost PG.PORT=6432 PG.USER=postgres PG.PASSWORD=postgres DB_CA_CERT=$(pwd)/ssl-cert-snakeoil.pem RUST_LOG=debug cargo run
-
 # outcome
 2022-08-17 00:58:42.612 UTC [64] LOG:  could not accept SSL connection: sslv3 alert bad certificate
 
-# SOLUTION on inspect certificate get the hostname from CN ex b9bdf96ee5bd
-$ openssl x509 -in ssl-cert-snakeoil.pem -text -noout | grep "Subject: CN"
+# get docker container id
+$ docker ps | grep 6432
+fa636caa65ab   postgres:12.2                    "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes    0.0.0.0:6432->5432/tcp, :::6432->5432/tcp                                                         sad_lalande
+# alert bad certificate SOLUTION on inspect certificate get the hostname from CN ex b9bdf96ee5bd
+$ docker exec -it fa636caa65ab bash
+$ openssl x509 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -text -noout | grep "Subject: CN"
         Subject: CN = b9bdf96ee5bd
-
 # add it to hosts
 127.0.0.1       b9bdf96ee5bd
+
+# bring certificate
+$ docker cp fa636caa65ab:/etc/ssl/certs/ssl-cert-snakeoil.pem .
 
 # and use it and now certificates works
 $ HOST=b9bdf96ee5bd
