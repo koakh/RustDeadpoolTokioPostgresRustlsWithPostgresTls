@@ -11,7 +11,7 @@
 $ env PG.DBNAME=postgres PG.HOST=localhost PG.PORT=6432 PG.USER=postgres PG.PASSWORD=postgres DB_CA_CERT=docker/postgres-certs/ca.pem RUST_LOG=debug cargo run
 ```
 
-used certificates that comes with image, else we always have permissions problems if use outside certificates, even with same permissions
+> OPTED : to use certificates that comes with image (ssl-cert-snakeoil.pem), else with self signed or gererated certificates we always have permissions problems if use outside certificates, even with same permissions
 
 ```shell
 $ docker run \
@@ -65,3 +65,4 @@ $ env PG.DBNAME=postgres PG.HOST=${HOST} PG.PORT=6432 PG.USER=postgres PG.PASSWO
 
 now it works
 ```
+NOTES
