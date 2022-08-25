@@ -24,7 +24,7 @@ $ docker run \
   -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem \
   -c ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
 # outcome
-2022-08-23 21:21:51.975 UTC [1] LOG:  database system is ready to accept connections  
+2022-08-23 21:21:51.975 UTC [1] LOG:  database system is ready to accept connections
 
 # using ssl-cert-snakeoil.pem from inside container with localhost will fail
 $ env PG.DBNAME=postgres PG.HOST=localhost PG.PORT=6432 PG.USER=postgres PG.PASSWORD=postgres DB_CA_CERT=$(pwd)/ssl-cert-snakeoil.pem RUST_LOG=debug cargo run
@@ -65,4 +65,3 @@ $ env PG.DBNAME=postgres PG.HOST=${HOST} PG.PORT=6432 PG.USER=postgres PG.PASSWO
 
 now it works
 ```
-NOTES
