@@ -83,12 +83,11 @@ now it works
 
 ## Fix connection problems Links: NotFound, message: "No such file or directory"
 
-Error: Backend(Error { kind: Connect, cause: Some(Os { code: 2, kind: NotFound, message: "No such file or directory" }) })
+the solution is connect with hostname `b9bdf96ee5bd`
+
+`Error: Backend(Error { kind: Connect, cause: Some(Os { code: 2, kind: NotFound, message: "No such file or directory" }) })`
 
 - [Question about error message &quot;No such file or directory&quot; when password is empty in configuration · Issue #82 · bikeshedder/deadpool](https://github.com/bikeshedder/deadpool/issues/82)
 - [Error Happened](https://sharebold.com/posts/a-curious-tale-of-rust-tls-and-postgres-in-the-cloud-434k)
 - [Enabling SSL for PostgreSQL in Docker](https://gist.github.com/mrw34/c97bb03ea1054afb551886ffc8b63c3b)
 - [Getting Title at 12:13](https://crates.io/crates/webpki-roots)
-
-update, if we remove DB_CA_CERT=$(pwd)/ssl-cert-snakeoil.pem it works
-seems that we don't need to pass the certificate in clients

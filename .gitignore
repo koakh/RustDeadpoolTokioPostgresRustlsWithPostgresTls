@@ -1,3 +1,4 @@
 /target
 .idea
 .bak/*.tgz
+docker/data
