@@ -14,9 +14,20 @@ $ env PG.DBNAME=postgres PG.HOST=localhost PG.PORT=6432 PG.USER=postgres PG.PASS
 > OPTED : to use certificates that comes with image (ssl-cert-snakeoil.pem), else with self signed or gererated certificates we always have permissions problems if use outside certificates, even with same permissions
 
 ```shell
+$ docker cp /etc/ssl/certs/ssl-cert-snakeoil.pem .
+$ docker cp /etc/ssl/private/ssl-cert-snakeoil.key .
+$ md5sum ssl-cert-snakeoil.pem
+c5db30afa098d158dc2efd30e94eec73  ssl-cert-snakeoil.key
+$ md5sum ssl-cert-snakeoil.key 
+c5db30afa098d158dc2efd30e94eec73  ssl-cert-snakeoil.key
+
+# run with certificates from inside container
 $ docker run \
   -it \
   --rm \
+  -e POSTGRES_DATABASE=postgres \
+  -e POSTGRES_ROOT_PASSWORD=root \
+  -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=password \
   -p 6432:5432 \
   postgres:12.2 \
@@ -34,11 +45,15 @@ $ env PG.DBNAME=postgres PG.HOST=localhost PG.PORT=6432 PG.USER=postgres PG.PASS
 # get docker container id
 $ docker ps | grep 6432
 fa636caa65ab   postgres:12.2                    "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes    0.0.0.0:6432->5432/tcp, :::6432->5432/tcp                                                         sad_lalande
-# alert bad certificate SOLUTION on inspect certificate get the hostname from CN ex b9bdf96ee5bd
-$ docker exec -it fa636caa65ab bash
-$ openssl x509 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -text -noout | grep "Subject: CN"
+
+# seems that the Subject: CN = b9bdf96ee5bd is always the same
+$ docker exec -it postgres-rust openssl x509 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -text -noout | grep "Subject: CN"
         Subject: CN = b9bdf96ee5bd
+
+# FINAL SOLUTION to get rid of the annoying error `NotFound, message: "No such file or directory"`
+# the  right way to use TLS, is addign `127.0.0.1 b9bdf96ee5bd` to hosts, and use same fqdn on cargo run, with a combination of `PG.HOST=${HOST} DB_CA_CERT=$(pwd)/ssl-cert-snakeoil.pem`, this way we are connect with same fqdn as in certificate
 # add it to hosts
+$ sudo nano /etc/hosts
 127.0.0.1       b9bdf96ee5bd
 
 # bring certificate
@@ -65,3 +80,15 @@ $ env PG.DBNAME=postgres PG.HOST=${HOST} PG.PORT=6432 PG.USER=postgres PG.PASSWO
 
 now it works
 ```
+
+## Fix connection problems Links: NotFound, message: "No such file or directory"
+
+Error: Backend(Error { kind: Connect, cause: Some(Os { code: 2, kind: NotFound, message: "No such file or directory" }) })
+
+- [Question about error message &quot;No such file or directory&quot; when password is empty in configuration · Issue #82 · bikeshedder/deadpool](https://github.com/bikeshedder/deadpool/issues/82)
+- [Error Happened](https://sharebold.com/posts/a-curious-tale-of-rust-tls-and-postgres-in-the-cloud-434k)
+- [Enabling SSL for PostgreSQL in Docker](https://gist.github.com/mrw34/c97bb03ea1054afb551886ffc8b63c3b)
+- [Getting Title at 12:13](https://crates.io/crates/webpki-roots)
+
+update, if we remove DB_CA_CERT=$(pwd)/ssl-cert-snakeoil.pem it works
+seems that we don't need to pass the certificate in clients

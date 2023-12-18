@@ -10,11 +10,17 @@ This project demonstrates how to use [Tokio Postgres](https://crates.io/crates/t
 ## TLDR
 
 ```bash
+# first add certificate hostname to hosts, we need to connect to postgres with this hostname for TLS works
+$ sudo nano /etc/hosts
+127.0.0.1       b9bdf96ee5bd
+
+# run with docker run
 $ docker run \
   -it \
   --rm \
   -e POSTGRES_PASSWORD=password \
   -p 6432:5432 \
+  --name postgres-rust \
   postgres:12.2 \
   -c ssl=on \
   -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem \
@@ -22,8 +28,15 @@ $ docker run \
 # outcome
 2022-08-23 21:21:51.975 UTC [1] LOG:  database system is ready to accept connections
 
-$ HOST=b9bdf96ee5bd
-$ env PG.DBNAME=postgres PG.HOST=${HOST} PG.PORT=6432 PG.USER=postgres PG.PASSWORD=password DB_CA_CERT=$(pwd)/ssl-cert-snakeoil.pem RUST_LOG=debug cargo run
+# or run with docker compose
+$ cd docker && sudo rm docker/data/ -r && docker-compose up
+
+# Don't change this host, this is a requirement fot TLS to work, this is the hostname of the ssl-cert-snakeoil.pem certificate, check note
+$ HOST="b9bdf96ee5bd"
+$ DB_CA_CERT="$(pwd)/ssl-cert-snakeoil.pem"
+# run with tls
+$ env PG.HOST=${HOST} DB_CA_CERT=${DB_CA_CERT} PG.DBNAME=postgres PG.PORT=6432 PG.USER=postgres PG.PASSWORD=password PG.SSL_MODE=Require RUST_LOG=debug cargo run
+
 # outcome
  DEBUG rustls::anchors                            > add_pem_file processed 1 valid and 0 invalid certs
  DEBUG rustls::client::hs                         > No cached session for DNSNameRef("b9bdf96ee5bd")
